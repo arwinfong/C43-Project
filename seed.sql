@@ -10,6 +10,11 @@ INSERT INTO USERS (name, sin, address, occupation, dob) VALUES
     ('Benjamin Anderson', '963-852-741', '9690 S. County St. Sioux Lookout, ON P8T 7T4', 'Sales Representative', '1989-09-30'),
     ('Sophia Taylor', '741-852-963', '32 Walnutwood Ave. Innisfail, AB T4G 9C1', 'Mechanical Engineer', '2003-10-08');
 
+INSERT INTO HOSTS (uid) VALUES
+    (2),
+    (7),
+    (6);
+
 INSERT INTO LISTINGS (price, longitude, latitude, type, hid, address) VALUES
     (410, -122.947106, 50.117276, 'House', 2, '4573 Chateau Blvd, BC V0N 1B4'),
     (200, -114.015641, 50.990937, 'Apartment', 7, '7005 18 St SE, AB T2C 1K1'),
