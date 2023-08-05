@@ -4,7 +4,7 @@ public class Schema {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
     static final String DB_USER = "root";
-    static final String DB_PASS = /* put your pw here */;
+    static final String DB_PASS = /* ur pw */;
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -50,7 +50,7 @@ public class Schema {
                           " longitude DECIMAL(9,6), " +
                           " type VARCHAR(20), " +
                           " hid INTEGER, " +
-                          " address VARCHAR(20), " +
+                          " address VARCHAR(50), " +
                           " PRIMARY KEY ( lid ), " +
                           " FOREIGN KEY ( hid ) REFERENCES HOSTS ( hid ));";
             stmt.executeUpdate(listings_table);

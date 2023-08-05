@@ -4,7 +4,7 @@ public class Seed {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
     static final String DB_USER = "root";
-    static final String DB_PASS = /* put your pw here */;
+    static final String DB_PASS = /* ur pw */;
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -26,10 +26,17 @@ public class Seed {
             stmt.executeUpdate(users);
             System.out.println("Users seeded");
 
+            String hosts = "INSERT INTO HOSTS (uid) VALUES" +
+            "(2)," +
+            "(6)," +
+            "(7);";
+            stmt.executeUpdate(hosts);
+            System.out.println("Hosts seeded");
+
             String listings = "INSERT INTO LISTINGS (price, longitude, latitude, type, hid, address) VALUES" +
-            "(410, -122.947106, 50.117276, 'House', 2, '4573 Chateau Blvd, BC V0N 1B4')," +
-            "(200, -114.015641, 50.990937, 'Apartment', 7, '7005 18 St SE, AB T2C 1K1')," +
-            "(300, -80.52287, 43.466432, 'Apartment', 6, '47 King St N, ON N2J 2W9');";
+            "(410, -122.947106, 50.117276, 'House', 1, '4573 Chateau Blvd, BC V0N 1B4')," +
+            "(200, -114.015641, 50.990937, 'Apartment', 2, '7005 18 St SE, AB T2C 1K1')," +
+            "(300, -80.52287, 43.466432, 'Apartment', 3, '47 King St N, ON N2J 2W9');";
             stmt.executeUpdate(listings);
             System.out.println("Listings seeded");
         } catch (Exception e) {
