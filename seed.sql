@@ -12,7 +12,7 @@ INSERT INTO USERS (name, sin, address, occupation, dob) VALUES
 
 INSERT INTO LISTINGS (price, longitude, latitude, type, hid, address) VALUES
     (410, -122.947106, 50.117276, 'House', 2, '4573 Chateau Blvd, BC V0N 1B4'),
-    (200, -114.015641, 50.990937, 'Apartment', 7, '	7005 18 St SE, AB T2C 1K1'),
+    (200, -114.015641, 50.990937, 'Apartment', 7, '7005 18 St SE, AB T2C 1K1'),
     (300, -80.52287, 43.466432, 'Apartment', 6, '47 King St N, ON N2J 2W9');
 
     

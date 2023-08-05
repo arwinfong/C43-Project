@@ -1,0 +1,22 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "username": "root",
+            "database": "c43",
+            "name": "c43 connection",
+            "askForPassword": true
+        }
+    ],
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\Users\\Arwin\\Downloads\\mysql-connector-j-8.1.0\\mysql-connector-j-8.1.0\\mysql-connector-j-8.1.0.jar"
+    ]
+}
