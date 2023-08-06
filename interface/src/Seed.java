@@ -68,6 +68,60 @@ public class Seed {
             "(200, -114.015641, 50.990937, 'Apartment', 2, '7005 18 St SE, AB T2C 1K1')," +
             "(300, -80.52287, 43.466432, 'Apartment', 3, '47 King St N, ON N2J 2W9');";
             stmt.executeUpdate(listings);
+
+            String amenities = "INSERT INTO amenities (name) VALUES" +
+            "('Free Wi-Fi')," +
+            "('Air Conditioning')," +
+            "('Fully Equipped Kitchen')," +
+            "('Swimming Pool')," +
+            "('Private Balcony')," +
+            "('Gym Access')," +
+            "('Pet-Friendly')," +
+            "('Free Parking')," +
+            "('Washer and Dryer')," +
+            "('Smart TV')," +
+            "('Fireplace')," +
+            "('Ocean View')," +
+            "('Hot Tub')," +
+            "('Outdoor BBQ Area')," +
+            "('Child-Friendly')," +
+            "('Bicycles for Guest Use')," +
+            "('24/7 Concierge Service')," +
+            "('Central Heating')," +
+            "('Garden or Patio')," +
+            "('Spa and Wellness Facilities');";
+            stmt.executeUpdate(amenities);
+            System.out.println("Amenities seeded");
+
+            String listing_amenities = "INSERT INTO LISTING_AMENITIES (lid, aid) VALUES" +
+            "(1, 3)," +
+            "(1, 4)," +
+            "(1, 6)," +
+            "(1, 8)," +
+            "(1, 11)," +
+            "(2, 1)," +
+            "(2, 2)," +
+            "(2, 3)," +
+            "(2, 4)," +
+            "(2, 5)," +
+            "(2, 6)," +
+            "(2, 7)," +
+            "(2, 8)," +
+            "(2, 9)," +
+            "(2, 10)," +
+            "(2, 11)," +
+            "(2, 12)," +
+            "(2, 13)," +
+            "(2, 14)," +
+            "(2, 15)," +
+            "(2, 16)," +
+            "(2, 17)," +
+            "(2, 18)," +
+            "(2, 19)," +
+            "(2, 20);";
+            stmt.executeUpdate(listing_amenities);
+            System.out.println("Listing amenities seeded");
+
             System.out.println("Listings seeded");
 
             String reservations = "INSERT INTO RESERVATIONS (ren_id, lid, start_date, end_date) VALUES " +

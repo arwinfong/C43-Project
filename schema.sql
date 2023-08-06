@@ -23,7 +23,7 @@ CREATE TABLE Listings (
 
 CREATE TABLE Amenities (
     aid INTEGER,
-    name VARCHAR(20),
+    name VARCHAR(40),
     PRIMARY KEY (aid)
 );
 
