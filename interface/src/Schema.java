@@ -58,7 +58,7 @@ public class Schema {
 
             String amenities_table = "CREATE TABLE AMENITIES" +
                           "(aid INTEGER not NULL AUTO_INCREMENT, " +
-                          " name VARCHAR(20), " +
+                          " name VARCHAR(40), " +
                           " PRIMARY KEY ( aid )); ";
             stmt.executeUpdate(amenities_table);
             System.out.println("Amenities table created");
