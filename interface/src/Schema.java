@@ -12,7 +12,7 @@ public class Schema {
             System.out.println("Connected to database");
             Statement stmt = conn.createStatement();
 
-            String drop_tables = "DROP TABLE IF EXISTS USERS, HOSTS, RENTERS, LISTINGS, AMENITIES, LISTING_AMENITIES, RESERVATIONS, COMMENTS, LISTING_COMMENTS, RENTER_COMMENTS;";
+            String drop_tables = "DROP TABLE IF EXISTS USERS, HOSTS, RENTERS, LISTINGS, AMENITIES, LISTING_AMENITIES, RESERVATIONS, COMMENTS, LISTING_COMMENTS, RENTER_COMMENTS, CALENDAR;";
             stmt.executeUpdate(drop_tables);
             System.out.println("Tables dropped");
 
@@ -50,6 +50,9 @@ public class Schema {
                           " longitude DECIMAL(9,6), " +
                           " type VARCHAR(20), " +
                           " hid INTEGER, " +
+                          " city VARCHAR(50), " +
+                          " country VARCHAR(50), " +
+                          " postal_code VARCHAR(50), " +
                           " address VARCHAR(50), " +
                           " PRIMARY KEY ( lid ), " +
                           " FOREIGN KEY ( hid ) REFERENCES HOSTS ( hid ));";

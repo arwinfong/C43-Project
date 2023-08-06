@@ -63,10 +63,10 @@ public class Seed {
             stmt.executeUpdate(renters);
             System.out.println("Renters seeded");
 
-            String listings = "INSERT INTO LISTINGS (price, longitude, latitude, type, hid, address) VALUES" +
-            "(410, -122.947106, 50.117276, 'House', 1, '4573 Chateau Blvd, BC V0N 1B4')," +
-            "(200, -114.015641, 50.990937, 'Apartment', 2, '7005 18 St SE, AB T2C 1K1')," +
-            "(300, -80.52287, 43.466432, 'Apartment', 3, '47 King St N, ON N2J 2W9');";
+            String listings = "INSERT INTO LISTINGS (price, longitude, latitude, type, hid, address, postal_code, city, country) VALUES" +
+            "(410, -122.947106, 50.117276, 'House', 1, '4573 Chateau Blvd', 'BC V0N 1B4', 'Whistler', 'Canada')," +
+            "(200, -114.015641, 50.990937, 'Apartment', 2, '7005 18 St SE', 'AB T2C 1K1', 'Calgary', 'Canada')," +
+            "(300, -80.52287, 43.466432, 'Apartment', 3, '47 King St N', 'ON N2J 2W9', 'Waterloo', 'Canada');";
             stmt.executeUpdate(listings);
 
             String amenities = "INSERT INTO amenities (name) VALUES" +
