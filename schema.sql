@@ -71,6 +71,18 @@ CREATE TABLE Reservations (
     CHECK (start_date < end_date)
 );
 
+CREATE TABLE Calendar (
+    lid INTEGER,
+    start_date DATE,
+    end_date DATE,
+    PRIMARY KEY (lid, start_date, end_date),
+    hid INTEGER,
+    ren_id INTEGER,
+    status VARCHAR(20),
+    FOREIGN KEY (lid) REFERENCES Listings,
+    FOREIGN KEY (hid) REFERENCES Hosts,
+    FOREIGN KEY (ren_id) REFERENCES Renters
+);
 
 CREATE TABLE Comments (
     rating INTEGER,

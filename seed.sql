@@ -1,3 +1,4 @@
+-- Active: 1691267127016@@127.0.0.1@3306@c43
 INSERT INTO USERS (name, sin, address, occupation, dob) VALUES
     ('Liam Johnson', '123-456-789', '5 Pin Oak Lane Blackville, NB E9B 1Y5', 'Software Engineer', '1990-01-15'),
     ('Olivia Smith', '987-654-321', '700 Rocky River Ave. Mercier, QC J6R 1M8', 'Nurse Practitioner', '1985-02-28'),
@@ -77,3 +78,9 @@ INSERT INTO LISTING_AMENITIES (lid, aid) VALUES
     (2, 18),
     (2, 19),
     (2, 20);
+
+INSERT INTO RESERVATIONS (ren_id, lid, start_date, end_date) 
+SELECT 4, 1, '2019-01-05', '2019-01-07' 
+WHERE '2019-01-05' >= CURDATE()
+AND '2019-01-07' >= CURDATE()
+AND NOT EXISTS (SELECT * FROM RESERVATIONS WHERE lid = 1 AND start_date <= '2019-01-04' AND end_date >= '2019-01-01');

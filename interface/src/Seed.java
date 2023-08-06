@@ -5,8 +5,8 @@ import java.util.List;
 public class Seed {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "java";
-    static final String DB_PASS = "password";
+    static final String DB_USER = "root";
+    static final String DB_PASS = "pw";
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -129,6 +129,12 @@ public class Seed {
             "(3, 1, '2019-01-04', '2019-01-07');";
             stmt.executeUpdate(reservations);
             System.out.println("Reservations seeded");
+
+            String calendar = "INSERT INTO CALENDAR (lid, start_date, end_date, hid, ren_id, status) VALUES " +
+            "(1, '2019-01-01', '2019-01-02', NULL, 1, 'booked')," +
+            "(1, '2019-01-04', '2019-01-07', NULL, 3, 'booked');";
+            stmt.executeUpdate(calendar);
+            System.out.println("Calendar seeded");
         } catch (Exception e) {
             System.out.println(e);
         }

@@ -3,8 +3,8 @@
 public class Schema {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "java";
-    static final String DB_PASS = "password";
+    static final String DB_USER = "root";
+    static final String DB_PASS = "pw";
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -78,12 +78,27 @@ public class Schema {
                           " lid INTEGER not NULL, " +
                           " start_date DATE, " +
                           " end_date DATE, " +
+                          " availability BOOLEAN, " +
                           " PRIMARY KEY ( res_id ), " +
                           " FOREIGN KEY ( ren_id ) REFERENCES RENTERS ( ren_id ), " +
                           " FOREIGN KEY ( lid ) REFERENCES LISTINGS ( lid ), " +
                           " CHECK ( start_date < end_date )); ";
             stmt.executeUpdate(reservations_table);
             System.out.println("Reservations table created");
+
+            String calendar_table = "CREATE TABLE Calendar" +
+                            "(lid INTEGER not NULL, " +
+                            " start_date DATE, " +
+                            " end_date DATE, " +
+                            " PRIMARY KEY (lid, start_date, end_date), " +
+                            " hid INTEGER, " +
+                            " ren_id INTEGER, " +
+                            " status VARCHAR(20), " +
+                            " FOREIGN KEY (lid) REFERENCES Listings ( lid ), " +
+                            " FOREIGN KEY (hid) REFERENCES Hosts ( hid ), " +
+                            " FOREIGN KEY (ren_id) REFERENCES Renters ( ren_id )); ";
+            stmt.executeUpdate(calendar_table);
+            System.out.println("Calendar table created");
 
             String comments_table = "CREATE TABLE COMMENTS" +
                           "(rating INTEGER, " +
@@ -121,44 +136,3 @@ public class Schema {
         }
     }
 }
-
-// CREATE TABLE Reservations (
-//     res_id INTEGER,
-//     ren_id INTEGER,
-//     lid INTEGER,
-//     start_date DATE,
-//     end_date DATE,
-//     PRIMARY KEY (res_id),
-//     FOREIGN KEY (ren_id) REFERENCES Renter,
-//     FOREIGN KEY (lid) REFERENCES Listings,
-//     CHECK (start_date < end_date)
-// );
-
-
-// CREATE TABLE Comments (
-//     rating INTEGER,
-//     comment VARCHAR(500),
-//     cid INTEGER,
-//     PRIMARY KEY (cid),
-//     CHECK (rating >= 0 AND rating <= 5)
-// );
-
-// CREATE TABLE ListingComments (
-//     lid INTEGER,
-//     cid INTEGER,
-//     ren_id INTEGER,
-//     PRIMARY KEY (lid, cid),
-//     FOREIGN KEY (lid) REFERENCES Listings,
-//     FOREIGN KEY (cid) REFERENCES Comments,
-//     FOREIGN KEY (ren_id) REFERENCES Renter
-// );
-
-// CREATE TABLE RenterComments (
-//     ren_id INTEGER,
-//     cid INTEGER,
-//     hid INTEGER,
-//     PRIMARY KEY (ren_id, cid),
-//     FOREIGN KEY (ren_id) REFERENCES Renter,
-//     FOREIGN KEY (cid) REFERENCES Comments,
-//     FOREIGN KEY (hid) REFERENCES Hosts
-// );

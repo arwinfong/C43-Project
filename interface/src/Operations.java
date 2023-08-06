@@ -12,8 +12,8 @@ import java.util.Scanner;
 public class Operations {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "java";
-    static final String DB_PASS = "password";
+    static final String DB_USER = "root";
+    static final String DB_PASS = "pw";
     static final String DATE_FORMAT = "MM/dd/yy";
 
     public static Date dateParseCheck(String dobString) throws ParseException {
@@ -84,27 +84,41 @@ public class Operations {
         Date startDate = null;
         Date endDate = null;
         
-        System.out.println("Insert a Listing ID ");
+        System.out.println("Insert a Listing ID ");     // Check valid listing ID
         listingId = scanner.nextLine();
+
         System.out.println("Input a start date (mm/dd/yyyy): ");
         startDateString = scanner.nextLine();
         startDate = dateParseCheck(startDateString);
+
         System.out.println("Input a end date (mm/dd/yyyy): ");
         endDateString = scanner.nextLine();
         endDate = dateParseCheck(endDateString);
-        while (startDate.before(endDate)) {
+        
+        while (startDate.after(endDate)) {
+            System.out.println("Start date must be before end date");
             System.out.println("Input a end date (mm/dd/yyyy): ");
             endDateString = scanner.nextLine();
             endDate = dateParseCheck(endDateString);
         }
+
         String insertReservation = "INSERT INTO RESERVATIONS (ren_id, lid, start_date, end_date) " +
-        " SELECT " + ren_id + ", " + listingId + ", " + startDate + ", " + endDate +
-        " WHERE NOT EXISTS (" +
+        " SELECT " + ren_id + ", " + listingId + ", '" + startDate + "', '" + endDate + "'" +
+        " WHERE '" + startDate + "' >= CURDATE()" +
+        " AND '" + endDate + "' >= CURDATE()" +
+        " AND NOT EXISTS (" +
             "SELECT * FROM RESERVATIONS" +
             " WHERE lid = " + listingId + 
-            " AND start_date <= " + endDate +
-            " AND end_date >= " + startDate + ");";
-        scanner.close();
+            " AND start_date <= '" + endDate + "'" +
+            " AND end_date >= '" + startDate + "')" +
+        " AND NOT EXISTS (" +
+            "SELECT * FROM CALENDAR" +
+            " WHERE lid = " + listingId + 
+            " AND status = 'booked' OR status = 'cancelled'" +
+            " AND start_date <= '" + endDate + "'" +
+            " AND end_date >= '" + startDate + "');";
+        
+        // TODO insert into Calendar table
         return insertReservation;
     }
 
@@ -112,23 +126,36 @@ public class Operations {
         Class.forName(JDBC_DRIVER);
         boolean failedReservation = true;
         Scanner scanner = new Scanner(System.in);
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
-        Statement stmt = conn.createStatement()) {
-            System.out.println("Welcome to MyBnB!");
-            while (true) {
+        System.out.println("Welcome to MyBnB!");
+        while (true) {
+                try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+                Statement stmt = conn.createStatement()) {
                 System.out.println("Choose an option:");
-                System.out.println("1: Create an account");
-                System.out.println("2: Login");
-                System.out.println("3: Book a listing");
+                System.out.println("1: Create an account"); 
+                System.out.println("2: Login");                         // TODO
+                System.out.println("3: Delete account");                // TODO
+                System.out.println("4: Cancel Booking");                // TODO
+                /* Renter operations */
+                System.out.println("5: Book a listing");             
+                System.out.println("6: Comment on a listing");          // TODO
+                /* Host Operations */
+                System.out.println("5: Update a Listing Price");        // TODO
+                System.out.println("6: Update a Listing Availability"); // TODO
+                System.out.println("7: Comment on a renter");           // TODO
+
                 System.out.println("0: Exit");
                 int option = Integer.parseInt(scanner.nextLine());
                 switch(option) {
+                case 0:
+                    System.out.println("Goodbye!");
+                    System.exit(0);
+                    break;
                 case 1:
                     if (createAccount(stmt))
                         System.out.println("Account created!");
                     else System.out.println("Account creation failed.");
                     break;
-                case 3:
+                case 4:
                     while (failedReservation) {
                         String ren_id = "1";
                         String tryReservation = bookListing(ren_id);
@@ -144,9 +171,10 @@ public class Operations {
                     break;
                 }
             }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        scanner.close();
+            catch (Exception e) {
+                System.out.println(e);
+            }
+        } 
+        // scanner.close();
     }
 }

@@ -4,7 +4,7 @@ public class Queries {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
     static final String DB_USER = "root";
-    static final String DB_PASS = /* ur pw */;
+    static final String DB_PASS = "pw";
 
     static String kmtoDegString(double km) {
         return Double.toString(km / 111.2);
