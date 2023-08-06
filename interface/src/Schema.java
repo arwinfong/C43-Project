@@ -1,10 +1,10 @@
-import java.sql.*;
+    import java.sql.*;
 
 public class Schema {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "root";
-    static final String DB_PASS = /* ur pw */;
+    static final String DB_USER = "java";
+    static final String DB_PASS = "password";
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -21,7 +21,7 @@ public class Schema {
                           " name VARCHAR(50), " +
                           " dob DATE, " +
                           " address VARCHAR(50), " +
-                          " sin VARCHAR(11), " +
+                          " sin CHAR(9), " +
                           " occupation VARCHAR(30), " +
                           " PRIMARY KEY ( uid )); ";
             stmt.executeUpdate(users_table);
