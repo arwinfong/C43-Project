@@ -3,8 +3,8 @@
 public class Schema {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "root";
-    static final String DB_PASS = "pw";
+    static final String DB_USER = "java";
+    static final String DB_PASS = "password";
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -31,7 +31,8 @@ public class Schema {
                             "(hid INTEGER not NULL AUTO_INCREMENT, " +
                             " uid INTEGER not NULL, " +
                             " PRIMARY KEY ( hid ), " +
-                            " FOREIGN KEY ( uid ) REFERENCES USERS ( uid ) ); ";
+                            " FOREIGN KEY ( uid ) REFERENCES USERS ( uid ) " +
+                            " ON DELETE CASCADE ); ";
             stmt.executeUpdate(hosts_table);
             System.out.println("Hosts table created");
 
@@ -39,7 +40,8 @@ public class Schema {
                             "(ren_id INTEGER not NULL AUTO_INCREMENT, " +
                             " uid INTEGER not NULL, " +
                             " PRIMARY KEY ( ren_id ), " +
-                            " FOREIGN KEY ( uid ) REFERENCES USERS ( uid ) ); ";
+                            " FOREIGN KEY ( uid ) REFERENCES USERS ( uid ) " +
+                            " ON DELETE CASCADE ); ";
             stmt.executeUpdate(renters_table);
             System.out.println("Renters table created");
 
@@ -55,7 +57,8 @@ public class Schema {
                           " postal_code VARCHAR(50), " +
                           " address VARCHAR(50), " +
                           " PRIMARY KEY ( lid ), " +
-                          " FOREIGN KEY ( hid ) REFERENCES HOSTS ( hid ));";
+                          " FOREIGN KEY ( hid ) REFERENCES HOSTS ( hid ) " +
+                          " ON DELETE CASCADE ); ";
             stmt.executeUpdate(listings_table);
             System.out.println("Listings table created");
 
@@ -70,8 +73,10 @@ public class Schema {
                           "(lid INTEGER not NULL AUTO_INCREMENT, " +
                           " aid INTEGER not NULL, " +
                           " PRIMARY KEY ( lid, aid ), " +
-                          " FOREIGN KEY ( lid ) REFERENCES LISTINGS ( lid ), " +
-                          " FOREIGN KEY ( aid ) REFERENCES AMENITIES ( aid )); ";
+                          " FOREIGN KEY ( lid ) REFERENCES LISTINGS ( lid ) " +
+                          " ON DELETE CASCADE, " +
+                          " FOREIGN KEY ( aid ) REFERENCES AMENITIES ( aid ) " +
+                          " ON DELETE CASCADE ); ";
             stmt.executeUpdate(listing_amenities_table);
             System.out.println("Listing amenities table created");
 
@@ -83,8 +88,10 @@ public class Schema {
                           " end_date DATE, " +
                           " availability BOOLEAN, " +
                           " PRIMARY KEY ( res_id ), " +
-                          " FOREIGN KEY ( ren_id ) REFERENCES RENTERS ( ren_id ), " +
-                          " FOREIGN KEY ( lid ) REFERENCES LISTINGS ( lid ), " +
+                          " FOREIGN KEY ( ren_id ) REFERENCES RENTERS ( ren_id ) " +
+                          " ON DELETE CASCADE, " +
+                          " FOREIGN KEY ( lid ) REFERENCES LISTINGS ( lid ) " +
+                          " ON DELETE CASCADE, " +
                           " CHECK ( start_date < end_date )); ";
             stmt.executeUpdate(reservations_table);
             System.out.println("Reservations table created");
@@ -97,9 +104,12 @@ public class Schema {
                             " hid INTEGER, " +
                             " ren_id INTEGER, " +
                             " status VARCHAR(20), " +
-                            " FOREIGN KEY (lid) REFERENCES Listings ( lid ), " +
-                            " FOREIGN KEY (hid) REFERENCES Hosts ( hid ), " +
-                            " FOREIGN KEY (ren_id) REFERENCES Renters ( ren_id )); ";
+                            " FOREIGN KEY (lid) REFERENCES Listings ( lid ) " +
+                            " ON DELETE CASCADE, " +
+                            " FOREIGN KEY (hid) REFERENCES Hosts ( hid ) " +
+                            " ON DELETE CASCADE, " +
+                            " FOREIGN KEY (ren_id) REFERENCES Renters ( ren_id ) " +
+                            " ON DELETE CASCADE) ";
             stmt.executeUpdate(calendar_table);
             System.out.println("Calendar table created");
 
@@ -117,9 +127,12 @@ public class Schema {
                           " cid INTEGER not NULL, " +
                           " ren_id INTEGER not NULL, " +
                           " PRIMARY KEY ( lid, cid ), " +
-                          " FOREIGN KEY ( lid ) REFERENCES LISTINGS ( lid ), " +
-                          " FOREIGN KEY ( cid ) REFERENCES COMMENTS ( cid ), " +
-                          " FOREIGN KEY ( ren_id ) REFERENCES RENTERS ( ren_id )); ";
+                          " FOREIGN KEY ( lid ) REFERENCES LISTINGS ( lid ) " +
+                          " ON DELETE CASCADE, " +
+                          " FOREIGN KEY ( cid ) REFERENCES COMMENTS ( cid ) " +
+                          " ON DELETE CASCADE, " +
+                          " FOREIGN KEY ( ren_id ) REFERENCES RENTERS ( ren_id ) " +
+                          " ON DELETE CASCADE ); ";
             stmt.executeUpdate(listing_comments_table);
             System.out.println("Listing comments table created");
 
@@ -128,9 +141,12 @@ public class Schema {
                           " cid INTEGER not NULL, " +
                           " hid INTEGER not NULL, " +
                           " PRIMARY KEY ( ren_id, cid ), " +
-                          " FOREIGN KEY ( ren_id ) REFERENCES RENTERS ( ren_id ), " +
-                          " FOREIGN KEY ( cid ) REFERENCES COMMENTS ( cid ), " +
-                          " FOREIGN KEY ( hid ) REFERENCES HOSTS ( hid )); ";
+                          " FOREIGN KEY ( ren_id ) REFERENCES RENTERS ( ren_id ) " +
+                          " ON DELETE CASCADE, " +
+                          " FOREIGN KEY ( cid ) REFERENCES COMMENTS ( cid ) " +
+                          " ON DELETE CASCADE, " +
+                          " FOREIGN KEY ( hid ) REFERENCES HOSTS ( hid ) " +
+                          " ON DELETE CASCADE ); ";
             stmt.executeUpdate(renter_comments_table);
             System.out.println("Renter comments table created");
         }

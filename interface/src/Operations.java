@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.sql.Date;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -80,41 +79,48 @@ public class Operations {
         return type;    // Check if two rows in total have been added
     }
 
-    public static int Login(Statement stmt, Scanner scanner) throws Exception {
+    public static List<Integer> Login(Statement stmt, Scanner scanner) throws Exception {
         int type;
         int sin;
+        List<Integer> res = new ArrayList<Integer>();
         System.out.println("Are you logging in as a renter or host? (0: renter; 1: host)");
         type = Integer.parseInt(scanner.nextLine());
         System.out.println("Input your SIN: ");
         sin = Integer.parseInt(scanner.nextLine());
         String uidQuery = String.format("SELECT uid FROM USERS WHERE sin = %d", sin);
-        try {
-            ResultSet rs = stmt.executeQuery(uidQuery);     // Throws exception if user not found
-            rs.next();
-            String uid = rs.getString("uid");
-            String _type = type == 0 ? "RENTERS" : "HOSTS";
-            String typeQuery = String.format("SELECT * FROM %s WHERE uid = %s", _type, uid);
-            rs = stmt.executeQuery(typeQuery);              // Throws exception user wrong type
-            return type;
-        }
-        catch (Exception e){
-            System.out.println("User not found");
-            return -1;
-        }
-    }
-
-    public static int deleteAccount(int type, Statement stmt, Scanner scanner) {
-        System.out.println("Are you sure you want to delete your account?");
-        System.out.println("Enter \"Y\" to confirm, press any other key to cancel.");
-        String confirm = scanner.nextLine();
-        if (confirm != "Y") {
-            System.out.println("Operation cancelled");
-            return type;
+        String uid;
+        ResultSet rs = stmt.executeQuery(uidQuery);     // Throws exception if user not found
+        if (rs.next()) {
+            uid = rs.getString("uid");
         }
         else {
+            uid = "-1";
+            System.out.println("User not found");
+        }
+        res.add(Integer.parseInt(uid));
+        String _type = type == 0 ? "RENTERS" : "HOSTS";
+        String typeQuery = String.format("SELECT * FROM %s WHERE uid = %s", _type, uid);
+        rs = stmt.executeQuery(typeQuery);
+        if (rs.next())
+            res.add(type);  // User correct type
+        else {
+            System.out.println("User not found");
+            res.add(-1);
+        }
+        System.out.println(String.format("%d %d", res.get(0), res.get(1)));
+        return res;
+    }
+
+    public static int deleteAccount(int type, int uid, Statement stmt, Scanner scanner) {
+        System.out.println("Are you sure you want to delete your account?");
+        System.out.println("Enter \"y\" to confirm, press any other key to cancel.");
+        String confirm = scanner.nextLine();
+        if (confirm.equalsIgnoreCase("y")) {
             try {
                 System.out.println("Deleting account...");
-                // TODO Account delete
+                // Delete user from Users
+                String sql = String.format("DELETE FROM Users WHERE uid = %d", uid);
+                stmt.executeUpdate(sql);
                 System.out.println("Deletion complete.");
                 return -1;
             }
@@ -122,6 +128,10 @@ public class Operations {
                 System.out.println("A problem occurred during deletion.");
                 return type;
             }
+        }
+        else {
+            System.out.println("Operation cancelled");
+            return type;
         }
     }
 
@@ -290,7 +300,8 @@ public class Operations {
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
-        int userType = -1;              // -1: Not logged in; 0: Renter; 1: Host
+        Integer userType = -1;              // -1: Not logged in; 0: Renter; 1: Host
+        Integer uid = -1;
         boolean looping = true;
         boolean failedReservation = true;
         String hid = "1";
@@ -303,14 +314,14 @@ public class Operations {
                 Statement stmt = conn.createStatement()) {
                 System.out.println("Choose an option:");
                 System.out.println("1: Create an account"); 
-                System.out.println("2: Login");                         
-                System.out.println("3: Delete account");                
+                System.out.println("2: Login");
+                System.out.println("3: Delete account");
                 System.out.println("4: Cancel Booking");                // TODO
                 /* Renter operations */
                 System.out.println("5: Book a listing");             
                 System.out.println("6: Comment on a listing");          // TODO
                 /* Host Operations */
-                System.out.println("7: Update a Listing Price");       
+                System.out.println("7: Update a Listing Price");
                 System.out.println("8: Update a Listing Availability");
                 System.out.println("9: Comment on a renter");           // TODO
 
@@ -331,15 +342,21 @@ public class Operations {
                     break;
                 case 2:
                     if (userType != -1) {
-                        System.out.println("Invalid operation");
+                        System.out.println("Invalid operation: Already logged in.");
                         break;
                     }
-                    userType = Login(stmt, scanner);
+                    List<Integer> loginResult = Login(stmt, scanner);
+                    uid = loginResult.get(0);
+                    userType = loginResult.get(1);
                     if (userType != -1)
                         System.out.println("Logged In!");
                     break;
                 case 3:
-                    userType = deleteAccount(userType, stmt, scanner);
+                    if (userType == -1) {
+                        System.out.println("Invalid operation: Not logged in.");
+                        break;
+                    }
+                    userType = deleteAccount(userType, uid, stmt, scanner);
                     break;
                 case 5:
                     while (failedReservation) {
