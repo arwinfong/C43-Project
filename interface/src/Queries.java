@@ -121,9 +121,10 @@ public class Queries {
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
         Scanner scanner = new Scanner(System.in);
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
-            Statement stmt = conn.createStatement();
-            while (true) {
+        System.out.println("Queries:");
+        while (true) {
+            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
+                Statement stmt = conn.createStatement();
                 System.out.println("1: Search for listings");
                 System.out.println("2: Search by postal code");
                 System.out.println("3: Search by address");
@@ -153,30 +154,9 @@ public class Queries {
                     default:
                         break;
                 }
-
+            } catch (Exception e) {
+                System.out.println("Invalid input or database error please try again");
             }
-            // Same/Adjecent Postal code
-            // String postalCode = "V0N 1B4";
-            // String samePostalCode = "SELECT * FROM LISTINGS WHERE address LIKE '%" + postalCode + "%'";
-            // rs = stmt.executeQuery(samePostalCode);
-            // System.out.println("Same Postal Code:");
-            // while (rs.next()) {
-            //     System.out.println(rs.getString("address"));
-            // }
-                        // String address = "4573 Chateau Blvd, BC V0N 1B4";
-            // String listing = "SELECT * FROM LISTINGS WHERE address = '" + address + "'";
-            // rs = stmt.executeQuery(listing);
-            // System.out.println("Exact Search:");
-            // System.out.println("lid | price | latitude | longitude | type | hid | address |");
-            // while (rs.next()) {
-            //     String row = "";
-            //     for (int i = 1; i <= 7; i++) {
-            //         row += rs.getString(i) + " | ";
-            //     }
-            //     System.out.println(row);
-            // }
-        } catch (Exception e) {
-            System.out.println(e);
         }
     }    
 }

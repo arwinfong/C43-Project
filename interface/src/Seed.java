@@ -5,8 +5,8 @@ import java.util.List;
 public class Seed {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "java";
-    static final String DB_PASS = "password";
+    static final String DB_USER = "root";
+    static final String DB_PASS = "pw";
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -22,6 +22,9 @@ public class Seed {
             drops.add("TRUNCATE TABLE RENTERS;");
             drops.add("TRUNCATE TABLE RESERVATIONS;");
             drops.add("TRUNCATE TABLE LISTINGS;"); 
+            drops.add("TRUNCATE TABLE LISTING_AMENITIES;");
+            drops.add("TRUNCATE TABLE AMENITIES;");
+            drops.add("TRUNCATE TABLE CALENDAR;");
             drops.add("TRUNCATE TABLE USERS;");
             for (String drop:drops) {
                 stmt.executeUpdate(drop);
@@ -66,7 +69,9 @@ public class Seed {
             String listings = "INSERT INTO LISTINGS (price, longitude, latitude, type, hid, address, postal_code, city, country) VALUES" +
             "(410, -122.947106, 50.117276, 'House', 1, '4573 Chateau Blvd', 'BC V0N 1B4', 'Whistler', 'Canada')," +
             "(200, -114.015641, 50.990937, 'Apartment', 2, '7005 18 St SE', 'AB T2C 1K1', 'Calgary', 'Canada')," +
-            "(300, -80.52287, 43.466432, 'Apartment', 3, '47 King St N', 'ON N2J 2W9', 'Waterloo', 'Canada');";
+            "(300, -80.52287, 43.466432, 'Single Room', 3, '47 King St N', 'ON N2J 2W9', 'Waterloo', 'Canada')," +
+            "(600, -80.72176, 35.11555, 'Apartment', 3, '4535 St. John Street', 'SK S4P 3Y2', 'Bruno', 'Canada')," +
+            "(300, 107.996300 , 13.993440, 'House', 1, '131-1, Gamjeon-dong', NULL, 'Sasang-gu', 'Korea');";
             stmt.executeUpdate(listings);
 
             String amenities = "INSERT INTO amenities (name) VALUES" +
@@ -132,7 +137,14 @@ public class Seed {
 
             String calendar = "INSERT INTO CALENDAR (lid, start_date, end_date, hid, ren_id, status) VALUES " +
             "(1, '2019-01-01', '2019-01-02', NULL, 1, 'booked')," +
-            "(1, '2019-01-04', '2019-01-07', NULL, 3, 'booked');";
+            "(2, '2019-01-04', '2019-01-07', NULL, 3, 'booked')," +
+            "(1, '2021-03-10', '2021-03-23', NULL, 5, 'cancelled')," +
+            "(3, '2021-11-04', '2021-11-08', NULL, 4, 'cancelled')," +
+            "(3, '2022-12-04', '2022-12-25', NULL, 2, 'cancelled')," +
+            "(2, '2022-12-25', '2023-01-03', NULL, 2, 'cancelled')," +
+            "(1, '2021-07-10', '2021-07-15', 1, NULL, 'cancelled')," +
+            "(2, '2021-08-09', '2021-08-12', 2, NULL, 'cancelled')," +
+            "(3, '2021-12-29', '2022-01-07', 3, NULL, 'cancelled');";
             stmt.executeUpdate(calendar);
             System.out.println("Calendar seeded");
         } catch (Exception e) {

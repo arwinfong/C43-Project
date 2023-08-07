@@ -79,8 +79,3 @@ INSERT INTO LISTING_AMENITIES (lid, aid) VALUES
     (2, 19),
     (2, 20);
 
-INSERT INTO RESERVATIONS (ren_id, lid, start_date, end_date) 
-SELECT 4, 1, '2019-01-05', '2019-01-07' 
-WHERE '2019-01-05' >= CURDATE()
-AND '2019-01-07' >= CURDATE()
-AND NOT EXISTS (SELECT * FROM RESERVATIONS WHERE lid = 1 AND start_date <= '2019-01-04' AND end_date >= '2019-01-01');

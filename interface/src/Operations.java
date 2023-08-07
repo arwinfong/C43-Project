@@ -14,8 +14,8 @@ import java.util.Scanner;
 public class Operations {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "java";
-    static final String DB_PASS = "password";
+    static final String DB_USER = "root";
+    static final String DB_PASS = "pw";
     static final String DATE_FORMAT = "MM/dd/yy";
 
     public static Date dateParseCheck(String dobString) throws ParseException {
@@ -303,15 +303,15 @@ public class Operations {
                 Statement stmt = conn.createStatement()) {
                 System.out.println("Choose an option:");
                 System.out.println("1: Create an account"); 
-                System.out.println("2: Login");                         // TODO
-                System.out.println("3: Delete account");                // TODO
+                System.out.println("2: Login");                         
+                System.out.println("3: Delete account");                
                 System.out.println("4: Cancel Booking");                // TODO
                 /* Renter operations */
                 System.out.println("5: Book a listing");             
                 System.out.println("6: Comment on a listing");          // TODO
                 /* Host Operations */
-                System.out.println("7: Update a Listing Price");        // TODO
-                System.out.println("8: Update a Listing Availability"); // TODO
+                System.out.println("7: Update a Listing Price");       
+                System.out.println("8: Update a Listing Availability");
                 System.out.println("9: Comment on a renter");           // TODO
 
                 System.out.println("0: Exit");
