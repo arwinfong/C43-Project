@@ -8,15 +8,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Scanner;
 import java.util.List;
+import java.util.Scanner;
 
 public class Operations {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "root";
-    static final String DB_PASS = "pw";
+    static final String DB_USER = "java";
+    static final String DB_PASS = "password";
     static final String DATE_FORMAT = "MM/dd/yy";
 
     public static Date dateParseCheck(String dobString) throws ParseException {
@@ -38,8 +37,7 @@ public class Operations {
         return day_diff > 6574;
     }
 
-    static boolean createAccount(Statement stmt) throws Exception {
-        Scanner scanner = new Scanner(System.in);
+    static int createAccount(Statement stmt, Scanner scanner) throws Exception {
         Date dob = null;
         int success = 0;
 
@@ -61,7 +59,9 @@ public class Operations {
         String sql = String.format("INSERT INTO Users (name, dob, address, sin, occupation) " +
         "VALUES ('%s', '%s', '%s', %d, '%s')",
         name, dob.toString(), addr, sin, occupation);
-        success += stmt.executeUpdate(sql);
+        success = stmt.executeUpdate(sql);
+        if (success == 0)
+            return -1;
 
         String getUid = "SELECT uid FROM USERS WHERE sin = " + Integer.toString(sin);
         ResultSet rs = stmt.executeQuery(getUid);
@@ -74,9 +74,55 @@ public class Operations {
         uid)
         : String.format("INSERT INTO Hosts (uid)" + "VALUES (%s) ",
         uid);
-        success += stmt.executeUpdate(sql2);
-        scanner.close();
-        return success == 2;    // Check if two rows in total have been added
+        success = stmt.executeUpdate(sql2);
+        if (success == 0)
+            return -1;
+        return type;    // Check if two rows in total have been added
+    }
+
+    public static int Login(Statement stmt, Scanner scanner) throws Exception {
+        int type;
+        int sin;
+        System.out.println("Are you logging in as a renter or host? (0: renter; 1: host)");
+        type = Integer.parseInt(scanner.nextLine());
+        System.out.println("Input your SIN: ");
+        sin = Integer.parseInt(scanner.nextLine());
+        String uidQuery = String.format("SELECT uid FROM USERS WHERE sin = %d", sin);
+        try {
+            ResultSet rs = stmt.executeQuery(uidQuery);     // Throws exception if user not found
+            rs.next();
+            String uid = rs.getString("uid");
+            String _type = type == 0 ? "RENTERS" : "HOSTS";
+            String typeQuery = String.format("SELECT * FROM %s WHERE uid = %s", _type, uid);
+            rs = stmt.executeQuery(typeQuery);              // Throws exception user wrong type
+            return type;
+        }
+        catch (Exception e){
+            System.out.println("User not found");
+            return -1;
+        }
+    }
+
+    public static int deleteAccount(int type, Statement stmt, Scanner scanner) {
+        System.out.println("Are you sure you want to delete your account?");
+        System.out.println("Enter \"Y\" to confirm, press any other key to cancel.");
+        String confirm = scanner.nextLine();
+        if (confirm != "Y") {
+            System.out.println("Operation cancelled");
+            return type;
+        }
+        else {
+            try {
+                System.out.println("Deleting account...");
+                // TODO Account delete
+                System.out.println("Deletion complete.");
+                return -1;
+            }
+            catch (Exception e) {
+                System.out.println("A problem occurred during deletion.");
+                return type;
+            }
+        }
     }
 
     static List<String> bookListing(String ren_id, Scanner scanner) throws ParseException {
@@ -244,13 +290,15 @@ public class Operations {
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
+        int userType = -1;              // -1: Not logged in; 0: Renter; 1: Host
+        boolean looping = true;
         boolean failedReservation = true;
         String hid = "1";
         String ren_id = "1"; 
         int count = 0;
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to MyBnB!");
-        while (true) {
+        while (looping) {
                 try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
                 Statement stmt = conn.createStatement()) {
                 System.out.println("Choose an option:");
@@ -262,22 +310,36 @@ public class Operations {
                 System.out.println("5: Book a listing");             
                 System.out.println("6: Comment on a listing");          // TODO
                 /* Host Operations */
-                System.out.println("5: Update a Listing Price");        // TODO
-                System.out.println("6: Update a Listing Availability"); // TODO
-                System.out.println("7: Comment on a renter");           // TODO
+                System.out.println("7: Update a Listing Price");        // TODO
+                System.out.println("8: Update a Listing Availability"); // TODO
+                System.out.println("9: Comment on a renter");           // TODO
 
                 System.out.println("0: Exit");
                 int option = Integer.parseInt(scanner.nextLine());
                 switch(option) {
                 case 0:
                     System.out.println("Goodbye!");
-                    scanner.close();
-                    System.exit(0);
+                    looping = false;
                     break;
                 case 1:
-                    if (createAccount(stmt))
+                    userType = createAccount(stmt, scanner);
+                    if (userType != -1) {
                         System.out.println("Account created!");
+                        System.out.println("Logged In!");
+                    }
                     else System.out.println("Account creation failed.");
+                    break;
+                case 2:
+                    if (userType != -1) {
+                        System.out.println("Invalid operation");
+                        break;
+                    }
+                    userType = Login(stmt, scanner);
+                    if (userType != -1)
+                        System.out.println("Logged In!");
+                    break;
+                case 3:
+                    userType = deleteAccount(userType, stmt, scanner);
                     break;
                 case 5:
                     while (failedReservation) {
@@ -318,6 +380,8 @@ public class Operations {
             catch (Exception e) {
                 System.out.println(e);
             }
-        } 
+        }
+        scanner.close();
+        System.exit(0);
     }
 }
