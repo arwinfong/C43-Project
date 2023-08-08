@@ -3,8 +3,8 @@
 public class Schema {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "java";
-    static final String DB_PASS = "password";
+    static final String DB_USER = "root";
+    static final String DB_PASS = "pw";
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -39,6 +39,7 @@ public class Schema {
             String renters_table = "CREATE TABLE RENTERS" +
                             "(ren_id INTEGER not NULL AUTO_INCREMENT, " +
                             " uid INTEGER not NULL, " +
+                            " payment_info VARCHAR(50)," +
                             " PRIMARY KEY ( ren_id ), " +
                             " FOREIGN KEY ( uid ) REFERENCES USERS ( uid ) " +
                             " ON DELETE CASCADE ); ";

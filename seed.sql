@@ -78,4 +78,3 @@ INSERT INTO LISTING_AMENITIES (lid, aid) VALUES
     (2, 18),
     (2, 19),
     (2, 20);
-
