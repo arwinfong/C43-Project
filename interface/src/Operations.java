@@ -15,7 +15,7 @@ public class Operations {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
     static final String DB_USER = "root";
-    static final String DB_PASS = "rtlq6s!$3nu8";
+    static final String DB_PASS = "pw";
     static final String DATE_FORMAT = "MM/dd/yy";
 
     public static Date dateParseCheck(String dobString) throws ParseException {
@@ -136,7 +136,90 @@ public class Operations {
         }
     }
 
-    static List<String> bookListing(String ren_id, Scanner scanner) throws ParseException {
+    static int cancelBooking(int type, int uid, Statement stmt, Scanner scanner) throws Exception{
+        String endDateString;
+        String startDateString;
+        Date startDate = null;
+        Date endDate = null;
+        String checkListing;
+        String ren_id = "";
+        String hid = "";
+        ResultSet rs;
+        int count = 0;
+
+        // Get ren_id
+        if (type == 0) {
+            String getRenID = "SELECT ren_id FROM RENTERS WHERE uid = " + uid + ";";
+            rs = stmt.executeQuery(getRenID);
+            rs.next();
+            ren_id = rs.getString("ren_id");
+        }
+        else {
+            String getHID = "SELECT hid FROM HOSTS WHERE uid = " + uid + ";";
+            rs = stmt.executeQuery(getHID);
+            rs.next();
+            hid = rs.getString("hid");
+        }
+
+        System.out.println("Input a start date (mm/dd/yyyy): ");
+        startDateString = scanner.nextLine();
+        startDate = dateParseCheck(startDateString);
+
+        System.out.println("Input a end date (mm/dd/yyyy): ");
+        endDateString = scanner.nextLine();
+        endDate = dateParseCheck(endDateString);
+        
+        while (startDate.after(endDate)) {
+            System.out.println("Start date must be before end date");
+            System.out.println("Input a end date (mm/dd/yyyy): ");
+            endDateString = scanner.nextLine();
+            endDate = dateParseCheck(endDateString);
+        }
+
+        System.out.println("Insert a Listing ID ");
+        String listingId = scanner.nextLine();
+
+        if (type == 0) {
+            // Check if list is booked in calendar by renter
+            checkListing = "SELECT * FROM CALENDAR WHERE lid = " + listingId +
+            " AND start_date = '" + startDate + "'" +
+            " AND end_date = '" + endDate + "'" +
+            " AND status = 'booked'" +
+            " AND ren_id = " + ren_id + ";";
+            rs = stmt.executeQuery(checkListing);
+            if (!rs.next()) {
+                System.out.println("You do not have a booking for this listing");
+                return 0;
+            }
+        }
+        else {
+            // Check if listing is by host
+            checkListing = "SELECT * FROM LISTINGS WHERE lid = " + listingId + " AND hid = " + hid + ";";
+            rs = stmt.executeQuery(checkListing);
+            if (!rs.next()) {
+                System.out.println("Listing does not belong to you or does not exist");
+                return 0;
+            }
+        }
+
+        // Update calendar
+        if (type == 0) {
+            String updateCalendar = "UPDATE CALENDAR SET status = 'cancelled', ren_id = "+ ren_id + ", hid = NULL WHERE lid = " + listingId +
+            " AND start_date = '" + startDate + "'" +
+            " AND end_date = '" + endDate + "'";
+            count = stmt.executeUpdate(updateCalendar);
+        }
+        else {
+            String updateCalendar = "UPDATE CALENDAR SET status = 'available', hid = " + hid + ", ren_id = NULL WHERE lid = " + listingId +
+            " AND start_date = '" + startDate + "'" +
+            " AND end_date = '" + endDate + "';";
+            count = stmt.executeUpdate(updateCalendar);
+        }
+    
+        return count;
+    }
+
+    static List<String> bookListing(int type, int uid, Scanner scanner, Statement stmt) throws Exception {
         String listingId;
         List<String> queries = new ArrayList<String>();
         String endDateString;
@@ -144,6 +227,12 @@ public class Operations {
         Date startDate = null;
         Date endDate = null;
         
+        // get ren_id
+        String getRenID = "SELECT ren_id FROM RENTERS WHERE uid = " + uid + ";";
+        ResultSet rs = stmt.executeQuery(getRenID);
+        rs.next();
+        String ren_id = rs.getString("ren_id");
+
         System.out.println("Insert a Listing ID ");   
         listingId = scanner.nextLine();
 
@@ -273,8 +362,12 @@ public class Operations {
         System.out.println("Rating saved!");
     }
 
-    static String updatePricing (Scanner scanner, Statement stmt, String hid) throws Exception {
-        // Check date
+    static String updatePricing (Scanner scanner, Statement stmt, int type, int uid) throws Exception {
+        // Get hid
+        String getHID = "SELECT hid FROM HOSTS WHERE uid = " + uid + ";";
+        ResultSet rs = stmt.executeQuery(getHID);
+        rs.next();
+        String hid = rs.getString("hid");
 
         boolean badLID = true;
         String listingId = "";
@@ -284,7 +377,7 @@ public class Operations {
     
             // Check if listing belongs to host
             String checkHost = "SELECT * FROM LISTINGS WHERE lid = " + listingId + " AND hid = " + hid + ";";
-            ResultSet rs = stmt.executeQuery(checkHost);
+            rs = stmt.executeQuery(checkHost);
             if (!rs.next()) {
                 System.out.println("Listing does not belong to host or does not exist");
             }
@@ -300,7 +393,7 @@ public class Operations {
         return updatePrice;
     }
 
-    static String updateAvailability(Scanner scanner, Statement stmt, String hid) throws Exception {
+    static String updateAvailability(Scanner scanner, Statement stmt, int type, int uid) throws Exception {
         boolean badLID = true;
         boolean badEntry = true;
         String listingId = "";
@@ -310,6 +403,12 @@ public class Operations {
         Date endDate = null;
         ResultSet rs;
         
+        // get hid
+        String getHID = "SELECT hid FROM HOSTS WHERE uid = " + uid + ";";
+        rs = stmt.executeQuery(getHID);
+        rs.next();
+        String hid = rs.getString("hid");
+
         while (badEntry) {
             while (badLID) {
                 System.out.println("Insert a Listing ID ");
@@ -392,8 +491,6 @@ public class Operations {
         Integer uid = -1;
         boolean looping = true;
         boolean failedReservation = true;
-        String hid = "1";
-        String ren_id = "1"; 
         int count = 0;
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome to MyBnB!");
@@ -446,9 +543,22 @@ public class Operations {
                     }
                     userType = deleteAccount(userType, uid, stmt, scanner);
                     break;
+                case 4:
+                    if (userType == -1) {
+                        System.out.println("Invalid operation: Not logged in.");
+                        break;
+                    }
+                    int cancelled = cancelBooking(userType, uid, stmt, scanner);
+                    if (cancelled == 0) {
+                        System.out.println("Please enter a valid reservation");
+                    }
+                    else {
+                        System.out.println("Reservation Cancelled");
+                    }
+                    break;
                 case 5:
                     while (failedReservation) {
-                        List<String> tryQueries = bookListing(ren_id, scanner);
+                        List<String> tryQueries = bookListing(0, uid, scanner, stmt);
                         count = 0;
                         for (String query : tryQueries) {
                             count += stmt.executeUpdate(query);
@@ -470,7 +580,7 @@ public class Operations {
                     addComment(scanner, stmt, 1, uid);
                     break;
                 case 7:
-                    count = stmt.executeUpdate(updatePricing(scanner, stmt, hid));
+                    count = stmt.executeUpdate(updatePricing(scanner, stmt, 1, uid));
                     if (count == 0) {
                         System.out.println("Please enter a valid listing");
                     }
@@ -479,7 +589,7 @@ public class Operations {
                     }
                     break;
                 case 8:
-                    count = stmt.executeUpdate(updateAvailability(scanner, stmt, hid));
+                    count = stmt.executeUpdate(updateAvailability(scanner, stmt, 1, uid));
                     if (count == 0) {
                         System.out.println("Please enter a valid listing");
                     }
