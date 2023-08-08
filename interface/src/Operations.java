@@ -504,7 +504,12 @@ public class Operations {
         return updateAvailability;
     }
 
-    static String insertListing (Scanner scanner, int hid, Statement stmt) throws Exception {
+    static String insertListing (Scanner scanner, int uid, Statement stmt) throws Exception {
+        String getHID = "SELECT hid FROM HOSTS WHERE uid = " + uid;
+        ResultSet rs = stmt.executeQuery(getHID);
+        rs.next();
+        String hid = rs.getString("hid");
+
         boolean existingListing = true;
         String address = "";
         String city = "";
@@ -545,9 +550,9 @@ public class Operations {
     
             // Check if listing exists
             String checkListing = "SELECT * FROM LISTINGS WHERE latitude = " + latitude + " AND longitude = " + longitude + 
-            " AND type = '" + type + "' AND hid = " + hid + " AND city = '" + city + "' AND country = '" + country + 
+            " AND type = '" + type + "' AND city = '" + city + "' AND country = '" + country + 
             "' AND postal_code = '" + postal_code + "' AND address = '" + address + "'";
-            ResultSet rs = stmt.executeQuery(checkListing);
+            rs = stmt.executeQuery(checkListing);
             if (rs.next()) {
                 System.out.println("Listing already exists");
             }
@@ -562,8 +567,12 @@ public class Operations {
         return insertListing;
     }
 
-    static String deleteListing (Scanner scanner, int hid, Statement stmt) throws Exception {
+    static String deleteListing (Scanner scanner, int uid, Statement stmt) throws Exception {
         boolean badLID = true;
+        String getHID = "SELECT hid FROM HOSTS WHERE uid = " + uid;
+        ResultSet rs = stmt.executeQuery(getHID);
+        rs.next();
+        String hid = rs.getString("hid");
         String lid = "";
         while (badLID) {
             System.out.println("Input a listing ID:");
@@ -571,19 +580,20 @@ public class Operations {
     
             // Check if listing belongs to host
             String checkHost = "SELECT * FROM LISTINGS WHERE lid = " + lid + " AND hid = " + hid + ";";
-            ResultSet rs = stmt.executeQuery(checkHost);
+            rs = stmt.executeQuery(checkHost);
             if (!rs.next()) {
                 System.out.println("Listing does not belong to host or does not exist");
+                continue;
             }
-
             // Check if listing is booked
-            String checkBooked = "SELECT * FROM CALENDAR WHERE lid = " + lid + " AND status != 'booked';";
+            String checkBooked = "SELECT * FROM CALENDAR WHERE lid = " + lid + " AND status = 'booked';";
             rs = stmt.executeQuery(checkBooked);
             if (rs.next()) {
                 System.out.println("Listing is booked");
             }
-        
-            badLID = false;
+            else {
+                badLID = false;
+            }
         }
 
         String deleteListing = "DELETE FROM LISTINGS WHERE lid = " + lid + " AND hid = " + hid + ";";

@@ -26,6 +26,7 @@ public class Seed {
             drops.add("TRUNCATE TABLE AMENITIES;");
             drops.add("TRUNCATE TABLE CALENDAR;");
             drops.add("TRUNCATE TABLE USERS;");
+            drops.add("TRUNCATE TABLE LISTING_COMMENTS");
             for (String drop:drops) {
                 stmt.executeUpdate(drop);
             }
@@ -172,15 +173,15 @@ public class Seed {
             String comments = "INSERT INTO COMMENTS (rating, comment) VALUES " +
             "(5, 'We absolutely loved our stay at this charming house in Whistler! The location was perfect, and the cozy atmosphere made us feel right at home.')," +
             "(4, 'The apartment in Calgary was a great find. The modern amenities and convenient location made our trip enjoyable and hassle-free.')," +
-            "(4.5, 'Our stay in the single room in Waterloo was fantastic. The host was incredibly welcoming, and the room had everything we needed for a comfortable stay.')," +
+            "(4, 'Our stay in the single room in Waterloo was fantastic. The host was incredibly welcoming, and the room had everything we needed for a comfortable stay.')," +
             "(5, 'The apartment in Bruno was simply stunning. The spacious layout and beautiful views made it a perfect retreat for our vacation.')," +
-            "(4.7, 'We had an amazing time at the house in Sasang-gu, Korea. The unique design and local charm added a special touch to our trip.')," +
-            "(4.8, 'The apartment on Main Street in San Francisco was fantastic. The central location made it easy for us to explore the city, and the amenities were top-notch.')," +
-            "(4.9, 'The house on Elm Avenue was a dream come true. The spacious layout and beautiful garden provided a relaxing and enjoyable getaway.')," +
+            "(4, 'We had an amazing time at the house in Sasang-gu, Korea. The unique design and local charm added a special touch to our trip.')," +
+            "(4, 'The apartment on Main Street in San Francisco was fantastic. The central location made it easy for us to explore the city, and the amenities were top-notch.')," +
+            "(5, 'The house on Elm Avenue was a dream come true. The spacious layout and beautiful garden provided a relaxing and enjoyable getaway.')," +
             "(5, 'Our stay in the condo in London was exceptional. The luxurious amenities and prime location allowed us to experience the best of the city.')," +
-            "(4.5, 'The apartment in New York exceeded our expectations. The modern decor and stunning city views made it a memorable and comfortable stay.')," +
-            "(4.6, 'We had a wonderful time at the townhouse in Minato-ku, Japan. The traditional design and convenient amenities offered a unique and delightful experience.')," +
-            "(4.8, 'The house in Hokota-shi, Japan, was the perfect retreat. The peaceful surroundings and thoughtful touches made it a truly relaxing and enjoyable stay.');";
+            "(4, 'The apartment in New York exceeded our expectations. The modern decor and stunning city views made it a memorable and comfortable stay.')," +
+            "(4, 'We had a wonderful time at the townhouse in Minato-ku, Japan. The traditional design and convenient amenities offered a unique and delightful experience.')," +
+            "(5, 'The house in Hokota-shi, Japan, was the perfect retreat. The peaceful surroundings and thoughtful touches made it a truly relaxing and enjoyable stay.');";
             stmt.executeUpdate(comments);
             System.out.println("Comments seeded");
 
