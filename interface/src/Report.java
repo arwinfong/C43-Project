@@ -424,53 +424,52 @@ public class Report {
                 try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
                     Statement stmt = conn.createStatement();
                     Statement stmt2 = conn.createStatement();   // For nested Result Sets
-                System.out.println("Choose an option:");
-                System.out.println("1: Report number of bookings");                                         
-                System.out.println("2: Report total number of listings");
-                System.out.println("3: Report hosts by number of listings");
-                System.out.println("4: Report hosts that have >10% of listings in a city or country");     
-                System.out.println("5: Report renters by number of bookings");                             
-                System.out.println("6: Report renters by number of bookings (later report)");               
-                System.out.println("7: Report hosts and renters with the most cancellations within a year");
-                System.out.println("8: Report popular noun phrases in comments");                           // Implemented all words instead of just noun phrases
-                System.out.println("0: Exit");
-                int option = Integer.parseInt(scanner.nextLine());
-                switch (option) {
-                    case 0:
-                        System.out.println("Goodbye!");
-                        scanner.close();
-                        System.exit(0);
-                        break;
-                    case 1:
-                        reportBookings(scanner, stmt);
-                        break;
-                    case 2:
-                        reportListings(scanner, stmt);
-                        break;
-                    case 3:
-                        reportHosts(scanner, stmt, stmt2);
-                        break;
-                    case 4:
-                        reportHostsGT10P(scanner, stmt, stmt2);
-                        break;
-                    case 5:
-                        reportRenters(scanner, stmt, stmt2);
-                        break;
-                    case 6:
-                        reportRentersGT2B(scanner, stmt);
-                        break;
-                    case 7:
-                        reportCancellations(scanner, stmt, stmt2);
-                        break;
-                    case 8:
-                        reportNounPhrases(scanner, stmt, stmt2);
-                        break;
-                    default:
-                        break;
-                }
+                    System.out.println("Choose an option:");
+                    System.out.println("1: Report number of bookings");                                         
+                    System.out.println("2: Report total number of listings");
+                    System.out.println("3: Report hosts by number of listings");
+                    System.out.println("4: Report hosts that have >10% of listings in a city or country");     
+                    System.out.println("5: Report renters by number of bookings");                             
+                    System.out.println("6: Report renters by number of bookings (later report)");               
+                    System.out.println("7: Report hosts and renters with the most cancellations within a year");
+                    System.out.println("8: Report popular noun phrases in comments");                           // Implemented all words instead of just noun phrases
+                    System.out.println("0: Exit");
+                    int option = Integer.parseInt(scanner.nextLine());
+                    switch (option) {
+                        case 0:
+                            System.out.println("Goodbye!");
+                            scanner.close();
+                            System.exit(0);
+                            break;
+                        case 1:
+                            reportBookings(scanner, stmt);
+                            break;
+                        case 2:
+                            reportListings(scanner, stmt);
+                            break;
+                        case 3:
+                            reportHosts(scanner, stmt, stmt2);
+                            break;
+                        case 4:
+                            reportHostsGT10P(scanner, stmt, stmt2);
+                            break;
+                        case 5:
+                            reportRenters(scanner, stmt, stmt2);
+                            break;
+                        case 6:
+                            reportRentersGT2B(scanner, stmt);
+                            break;
+                        case 7:
+                            reportCancellations(scanner, stmt, stmt2);
+                            break;
+                        case 8:
+                            reportNounPhrases(scanner, stmt, stmt2);
+                            break;
+                        default:
+                            break;
+                    }
             }
             catch (Exception e) {
-                System.out.println(e);
                 System.out.println("Invalid input or database error please try again");
             }
         }

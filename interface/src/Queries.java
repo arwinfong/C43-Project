@@ -34,38 +34,56 @@ public class Queries {
         System.out.println("Enter longitude of the listing: ");
         String lon = scanner.nextLine();
         System.out.println("Enter distance in km: ");
-        Double dist = Double.parseDouble(scanner.nextLine());
+        String inDist = scanner.nextLine();
+        if (inDist.equals("")) {
+            inDist = "111.2";       // Default distance is 1 Degree of latitude
+        }
+        Double dist = Double.parseDouble(inDist);
+        System.out.println("Rank by distance or price? (0: Distance; 1: Price): ");
+        String rank = (scanner.nextLine().compareTo("0") == 0) ? "DISTANCE" : "PRICE";
+        System.out.println("Ascending or descending? (0: Ascending; 1: Descending): ");
+        String order = (scanner.nextLine().compareTo("0") == 0) ? "ASC" : "DESC";
 
         String distance = kmtoDegString(dist);
-        String closestDistance = "SELECT address, POWER(latitude - "+ lat +", 2) + POWER(longitude - " + lon + ", 2) as DISTANCE FROM LISTINGS" +
+        String closestDistance = "SELECT price, address, POWER(latitude - "+ lat +", 2) + POWER(longitude - " + lon + ", 2) as DISTANCE FROM LISTINGS" +
         " WHERE POWER(latitude - "+ lat +", 2) + POWER(longitude - " + lon + ", 2) < POWER(" + distance + ", 2)"+
-        " ORDER BY DISTANCE ASC;";
-
-        // Create option to sort by price
+        " ORDER BY " + rank + " " + order;
 
         ResultSet rs = stmt.executeQuery(closestDistance);
-        System.out.println("Closest listings:");
+        System.out.println("Closest listings to " + lat + ", " + lon + " within " + dist + " km:");
         int count = 1;
         System.out.println("----------------------------------");
         while (rs.next()) {
             System.out.println("Entry " + count + ":");
             System.out.println("Address: " + rs.getString("address"));
-            System.out.println("Distance:" + rs.getString("DISTANCE"));
+            System.out.println("Price: " + rs.getString("price"));
+            System.out.println("Distance: " + Math.sqrt(rs.getDouble("DISTANCE")) * 111.2 + " km");
             System.out.println("----------------------------------");
             count++;
         }
     }
 
-    // static void searchByPostalCode (Scanner scanner, Statement stmt) throws Exception {
-    //     System.out.println("Enter postal code: ");
-    //     String postalCode = scanner.nextLine();
-    //     String samePostalCode = "SELECT * FROM LISTINGS WHERE address LIKE '%" + postalCode + "%'";
-    //     ResultSet rs = stmt.executeQuery(samePostalCode);
-    //     System.out.println("Same Postal Code:");
-    //     while (rs.next()) {
-    //         System.out.println(rs.getString("address"));
-    //     }
-    // }
+    static void searchByPostalCode (Scanner scanner, Statement stmt) throws Exception {
+        System.out.println("Enter postal code: ");
+        String postalCode = scanner.nextLine();
+        String listing;
+        if (postalCode.equals("")) {
+            listing = "SELECT * FROM LISTINGS WHERE postal_code IS NULL";
+        }
+        else {
+            listing = "SELECT * FROM LISTINGS WHERE postal_code = '" + postalCode + "'";
+        }
+        ResultSet rs = stmt.executeQuery(listing);
+        System.out.println("Exact Search:");
+        System.out.println("lid | price | latitude | longitude | type | hid | address |");
+        while (rs.next()) {
+            String row = "";
+            for (int i = 1; i <= 7; i++) {
+                row += rs.getString(i) + " | ";
+            }
+            System.out.println(row);
+        }
+    }
 
     static void searchByAddress (Scanner scanner, Statement stmt) throws Exception {
         System.out.println("Enter address (Exact): ");
@@ -89,17 +107,17 @@ public class Queries {
         Date startDate = null;
         Date endDate = null;
 
-        System.out.println("Input a start date (mm/dd/yyyy): ");
+        System.out.println("Input a start date for availability (mm/dd/yyyy): ");
         startDateString = scanner.nextLine();
         startDate = dateParseCheck(startDateString);
 
-        System.out.println("Input a end date (mm/dd/yyyy): ");
+        System.out.println("Input a end date for availability (mm/dd/yyyy): ");
         endDateString = scanner.nextLine();
         endDate = dateParseCheck(endDateString);
         
         while (startDate.after(endDate)) {
             System.out.println("Start date must be before end date");
-            System.out.println("Input a end date (mm/dd/yyyy): ");
+            System.out.println("Input a end date for availability (mm/dd/yyyy): ");
             endDateString = scanner.nextLine();
             endDate = dateParseCheck(endDateString);
         }
@@ -118,6 +136,73 @@ public class Queries {
             System.out.println(row);
         }
     }
+
+    static void searchFully(Scanner scanner, Statement stmt, Statement stmt2) throws Exception {
+        String endDateString;
+        String startDateString;
+        Date startDate = null;
+        Date endDate = null;
+        String amenitySearch;
+
+        System.out.println("Enter postal code: ");
+        String postalCode = scanner.nextLine();
+        System.out.println("Enter a list of amenities separated by commas: (Ex. Free Wi-Fi, Hot Tub, etc.)");
+        String amenities = scanner.nextLine();
+
+        System.out.println("Input a start date for availability (mm/dd/yyyy): ");
+        startDateString = scanner.nextLine();
+        startDate = dateParseCheck(startDateString);
+
+        System.out.println("Input a end date for availability (mm/dd/yyyy): ");
+        endDateString = scanner.nextLine();
+        endDate = dateParseCheck(endDateString);
+        
+        while (startDate.after(endDate)) {
+            System.out.println("Start date must be before end date");
+            System.out.println("Input a end date for availability (mm/dd/yyyy): ");
+            endDateString = scanner.nextLine();
+            endDate = dateParseCheck(endDateString);
+        }
+
+        System.out.println("Enter a minimum price: ");
+        String minPrice = scanner.nextLine();
+        System.out.println("Enter a maximum price: ");
+        String maxPrice = scanner.nextLine();
+
+        // Search for listings with all amenities in the list
+        if (amenities.equals("")) {
+            amenitySearch = "SELECT lid FROM LISTINGS";
+        }
+        else {
+            amenitySearch = "SELECT lid FROM LISTINGS WHERE lid IN (SELECT lid FROM LISTING_AMENITIES WHERE aid IN (SELECT aid FROM AMENITIES WHERE name IN (" +
+            "SELECT * FROM (SELECT DISTINCT '" + amenities.replace(", ", "' UNION SELECT DISTINCT '") + "') AS T)) GROUP BY lid HAVING COUNT(DISTINCT aid) = " + amenities.split(",").length + ")";
+        }
+        ResultSet rs = stmt.executeQuery(amenitySearch);
+        System.out.println("| lid | price | latitude | longitude | type | hid | address |");
+        while (rs.next()) {
+            String listing;
+            // Search for listings with other filters
+            if (postalCode.equals("")) {
+                listing = "SELECT * FROM LISTINGS WHERE lid = " + rs.getString("lid") + 
+                " AND postal_code IS NULL AND price >= " + minPrice + " AND price <= " + maxPrice + 
+                " AND lid IN (SELECT lid FROM CALENDAR WHERE end_date >= '" + startDate + "' AND start_date <= '" + endDate + "' AND status = 'available')";
+            }
+            else {
+                listing = "SELECT * FROM LISTINGS WHERE lid = " + rs.getString("lid") + 
+                " AND postal_code = '" + postalCode + "' AND price >= " + minPrice + " AND price <= " + maxPrice + 
+                " AND lid IN (SELECT lid FROM CALENDAR WHERE end_date >= '" + startDate + "' AND start_date <= '" + endDate + "' AND status = 'available')";
+            }
+
+            ResultSet sub_rs = stmt2.executeQuery(listing);
+            while (sub_rs.next()) {
+                String row = "";
+                for (int i = 1; i <= 7; i++) {
+                    row += sub_rs.getString(i) + " | ";
+                }
+                System.out.println(row);
+            }
+        }  
+    }
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
         Scanner scanner = new Scanner(System.in);
@@ -125,10 +210,12 @@ public class Queries {
         while (true) {
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
                 Statement stmt = conn.createStatement();
+                Statement stmt2 = conn.createStatement();
                 System.out.println("1: Search for listings");
                 System.out.println("2: Search by postal code");
                 System.out.println("3: Search by address");
                 System.out.println("4: Search by availability");
+                System.out.println("5: Search fully");
                 System.out.println("0: Exit");
                 int option = Integer.parseInt(scanner.nextLine());
                 switch (option) {
@@ -141,6 +228,7 @@ public class Queries {
                         searchListing(scanner, stmt);
                         break;
                     case 2:
+                        searchByPostalCode(scanner, stmt);
                         break;
                     case 3:
                         searchByAddress(scanner, stmt);
@@ -149,12 +237,13 @@ public class Queries {
                         searchByAvailability(scanner, stmt);
                         break;
                     case 5:
-
+                        searchFully(scanner, stmt, stmt2);
                         break;
                     default:
                         break;
                 }
             } catch (Exception e) {
+                System.out.println(e);
                 System.out.println("Invalid input or database error please try again");
             }
         }
