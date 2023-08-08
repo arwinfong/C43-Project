@@ -141,6 +141,7 @@ public class Seed {
             String reservations = "INSERT INTO RESERVATIONS (ren_id, lid, start_date, end_date) VALUES " +
             "(1, 1, '2019-01-01', '2019-01-02'),"+
             "(3, 1, '2019-01-04', '2019-01-07'),"+
+            "(1, 2, '2023-08-01', '2023-08-02')," +
             "(3, 2, '2020-03-13', '2020-03-21');";
             stmt.executeUpdate(reservations);
             System.out.println("Reservations seeded");

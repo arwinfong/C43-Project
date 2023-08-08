@@ -7,8 +7,8 @@ import java.util.Scanner;
 public class Queries {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "root";
-    static final String DB_PASS ="pw";
+    static final String DB_USER = "java";
+    static final String DB_PASS ="password";
     static final String DATE_FORMAT = "MM/dd/yy";
 
     static String kmtoDegString(double km) {

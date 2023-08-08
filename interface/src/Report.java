@@ -8,8 +8,8 @@ import java.util.HashMap;
 public class Report {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "root";
-    static final String DB_PASS = "pw";
+    static final String DB_USER = "java";
+    static final String DB_PASS = "password";
     static final String DATE_FORMAT = "MM/dd/yy";
 
     public static Date dateParseCheck(String dobString) throws ParseException {
@@ -48,7 +48,8 @@ public class Report {
         }
 
         // Join reservations and listings
-        String bookings = "SELECT L.city, COUNT(*) AS BOOKINGS FROM RESERVATIONS R, LISTINGS L WHERE R.lid = L.lid AND R.start_date >= '" + startDate + "' AND R.end_date <= '" + endDate + "'" +
+        String bookings = "SELECT L.city, COUNT(*) AS BOOKINGS FROM CALENDAR C, LISTINGS L WHERE C.lid = L.lid AND C.start_date >= '" + startDate + "' AND C.end_date <= '" + endDate + "'" +
+        " AND C.status = 'booked'" +
         " GROUP BY city";
         ResultSet rs = stmt.executeQuery(bookings);
         System.out.println("Total bookings between " + startDate + " and " + endDate + ":");
@@ -60,7 +61,8 @@ public class Report {
         }
 
         // By postal code
-        String bookingsByZip = "SELECT L.postal_code, COUNT(*) AS BOOKINGS FROM RESERVATIONS R, LISTINGS L WHERE R.lid = L.lid AND R.start_date >= '" + startDate + "' AND R.end_date <= '" + endDate + "'" +
+        String bookingsByZip = "SELECT L.postal_code, COUNT(*) AS BOOKINGS FROM CALENDAR C, LISTINGS L WHERE C.lid = L.lid AND C.start_date >= '" + startDate + "' AND C.end_date <= '" + endDate + "'" +
+        " AND C.status = 'booked'" +
         " GROUP BY postal_code";
         rs = stmt.executeQuery(bookingsByZip);
         System.out.println("Total bookings by postal code between" + startDate + " and " + endDate + ":");
@@ -470,6 +472,7 @@ public class Report {
                     }
             }
             catch (Exception e) {
+                System.out.println(e);
                 System.out.println("Invalid input or database error please try again");
             }
         }

@@ -4,8 +4,8 @@ import java.util.Scanner;
 public class Hostkit {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "root";
-    static final String DB_PASS = "pw";
+    static final String DB_USER = "java";
+    static final String DB_PASS = "password";
 
     static void suggestPrice(Scanner scanner, Statement stmt) throws Exception {
         System.out.println("Enter a city: ");
