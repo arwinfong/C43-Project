@@ -2,6 +2,13 @@
 
 Members: Arwin Fong, Eric Fan
 
+## Instllation Instructions
+Download the SQL connector from https://dev.mysql.com/downloads/connector/j/. Choose an operating system (Recommended: Platform Independent) and then download the zip version
+
+Unzip the file and navigate through the folder until you find mysql-connector-j-(Your current version).
+
+If you are on VSCode, find the Java Projects tab > Reference Libraries, drop the jar file inside and refresh.
+
 ## Description
 This project aims to create a AirBnB-esque application using MySQL. This app would allow users to create listings, book residence at a listing, and/or leave comments on listings or renters.
 
