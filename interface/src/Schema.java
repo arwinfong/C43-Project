@@ -39,6 +39,7 @@ public class Schema {
             String renters_table = "CREATE TABLE RENTERS" +
                             "(ren_id INTEGER not NULL AUTO_INCREMENT, " +
                             " uid INTEGER not NULL, " +
+                            " payment_info VARCHAR(50)," +
                             " PRIMARY KEY ( ren_id ), " +
                             " FOREIGN KEY ( uid ) REFERENCES USERS ( uid ) " +
                             " ON DELETE CASCADE ); ";

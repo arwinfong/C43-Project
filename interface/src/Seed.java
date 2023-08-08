@@ -6,7 +6,7 @@ public class Seed {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
     static final String DB_USER = "root";
-    static final String DB_PASS = "pw";
+    static final String DB_PASS = "rtlq6s!$3nu8";
 
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
@@ -57,14 +57,14 @@ public class Seed {
             stmt.executeUpdate(hosts);
             System.out.println("Hosts seeded");
 
-            String renters = "INSERT INTO RENTERS (uid) VALUES" +
-            "(1)," +
-            "(3)," +
-            "(4)," +
-            "(5)," +
-            "(8)," +
-            "(9)," +
-            "(10);";
+            String renters = "INSERT INTO RENTERS (uid, payment_info) VALUES" +
+            "(1, 'Credit Card')," +
+            "(3, 'Debit Card')," +
+            "(4, 'Credit Card')," +
+            "(5, 'Credit Card')," +
+            "(8, 'Credit Card')," +
+            "(9, 'Debit Card')," +
+            "(10, 'Credit Card');";
             stmt.executeUpdate(renters);
             System.out.println("Renters seeded");
 
