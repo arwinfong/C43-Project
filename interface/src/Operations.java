@@ -14,8 +14,8 @@ import java.util.Scanner;
 public class Operations {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "root";
-    static final String DB_PASS = "pw";
+    static final String DB_USER = "java";
+    static final String DB_PASS = "password";
     static final String DATE_FORMAT = "MM/dd/yy";
 
     public static Date dateParseCheck(String dobString) throws ParseException {
@@ -40,6 +40,7 @@ public class Operations {
     static int createAccount(Statement stmt, Scanner scanner) throws Exception {
         Date dob = null;
         int success = 0;
+        String pay_info = "";
 
         System.out.println("Input your name: ");
         String name = scanner.nextLine();
@@ -56,6 +57,23 @@ public class Operations {
         int sin = Integer.parseInt(scanner.nextLine());
         System.out.println("Are you a renter or a host? (0: Renter; 1: Host)");
         int type = Integer.parseInt(scanner.nextLine());
+        if (type == 0) {
+            Boolean badMethod = true;
+            while (badMethod) {
+                System.out.println("Please choose a payment method (0: Credit Card, 1: Debit Card)");
+                String payMethod = scanner.nextLine();
+                if (payMethod == "0") {
+                    pay_info = "Credit Card";
+                    badMethod = false;
+                }
+                else if (payMethod == "1") {
+                    pay_info = "Debit Card";
+                    badMethod = false;
+                }
+                else
+                    System.out.println("Invalid input");
+            }
+        }
         String sql = String.format("INSERT INTO Users (name, dob, address, sin, occupation) " +
         "VALUES ('%s', '%s', '%s', %d, '%s')",
         name, dob.toString(), addr, sin, occupation);
@@ -70,8 +88,8 @@ public class Operations {
         System.out.println(uid);
 
         String sql2 = (type == 0)     // type: 0 = renter; 1 = host
-        ? String.format("INSERT INTO Renters (uid)" + "VALUES (%s) ",
-        uid)
+        ? String.format("INSERT INTO Renters (uid, payment_info)" + "VALUES (%s, %s) ",
+        uid, pay_info)
         : String.format("INSERT INTO Hosts (uid)" + "VALUES (%s) ",
         uid);
         success = stmt.executeUpdate(sql2);
@@ -278,30 +296,28 @@ public class Operations {
     static void addComment(Scanner scanner, Statement stmt, Integer type, Integer curUID) throws Exception {
         ResultSet rs = null;
         boolean badEntry = true;
-        boolean badID = true;
         String id = "";
         String subject = type == 0 ? "user" : "listing";
-        Date startDate = null;
-        Date endDate = null;
+        java.util.Date dateNow = new java.util.Date();
+        java.sql.Date curDate = new java.sql.Date(dateNow.getTime());
         while (badEntry) {
-            while (badID) {
-                System.out.println(String.format("Input %s's ID: ", subject));
-                id = scanner.nextLine();
-                String subExist = type == 0
-                ? String.format("SELECT ren_id FROM Renters WHERE uid = %s", id)
-                : String.format("SELECT * FROM Listings WHERE lid = %s", id);
-                rs = stmt.executeQuery(subExist);
-                if (rs.next())
-                    badID = false;      // Renter/Lising exists
-                else
-                    System.out.println(String.format("The %s does not exist", subject));
-            }
-            java.util.Date dateNow = new java.util.Date();
-            java.sql.Date curDate = new java.sql.Date(dateNow.getTime());
+            System.out.println(String.format("Input %s's ID: ", subject));
+            id = scanner.nextLine();
+            String subExist = type == 0
+            ? String.format("SELECT ren_id FROM Renters WHERE uid = %s", id)
+            : String.format("SELECT * FROM Listings WHERE lid = %s", id);
+            
+            rs = stmt.executeQuery(subExist);
+            rs.next();
             if (type == 0) {
+                String rid = rs.getString("ren_id");
+                if (rid == null) {
+                    System.out.println(String.format("The %s does not exist", subject));
+                    continue;
+                }
                 // Checks if renter has rented in host's listings
-                String checkUser =  "SELECT * FROM CALENDAR WHERE ren_id = " + id +
-                " AND hid = " + curUID + 
+                String checkUser =  "SELECT * FROM CALENDAR WHERE ren_id = " + rid +
+                " OR hid = " + curUID + 
                 " AND status = 'booked' " +
                 " AND (start_date <= '" + curDate + "' <= end_date" +
                 " OR end_date + interval 2 week >= '" + curDate + "');";
@@ -309,20 +325,23 @@ public class Operations {
                 if (!rs.next()) {
                     System.out.println("User not found.");
                     System.out.println(badEntry);
+                    continue;
                 }
                 else {
                     badEntry = false;
                 }
             }
             else {
-                // Check if list is in calendar
+                // Check if listing is in calendar
                 String checkListing = "SELECT * FROM CALENDAR WHERE lid = " + id +
+                " AND ren_id = " + curUID +
                 " AND status = 'booked' " +
                 " AND (start_date <= '" + curDate + "' <= end_date" +
                 " OR end_date + interval 2 week >= '" + curDate + "');";
                 rs = stmt.executeQuery(checkListing);
                 if (!rs.next()) {
                     System.out.println("Listing not found");
+                    continue;
                 }
                 else {
                     badEntry = false;
