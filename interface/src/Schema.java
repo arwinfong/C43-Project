@@ -118,7 +118,7 @@ public class Schema {
                           " comment VARCHAR(500), " +
                           " cid INTEGER AUTO_INCREMENT, " +
                           " PRIMARY KEY ( cid ), " +
-                          " CHECK ( rating >= 0 AND rating <= 5 )); ";
+                          " CHECK ( rating >= 1 AND rating <= 5 )); ";
             stmt.executeUpdate(comments_table);
             System.out.println("Comments table created");
 

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+// import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +14,8 @@ import java.util.Scanner;
 public class Operations {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/c43";
-    static final String DB_USER = "root";
-    static final String DB_PASS = "pw";
+    static final String DB_USER = "java";
+    static final String DB_PASS = "password";
     static final String DATE_FORMAT = "MM/dd/yy";
 
     public static Date dateParseCheck(String dobString) throws ParseException {
@@ -107,13 +108,13 @@ public class Operations {
             System.out.println("User not found");
             res.add(-1);
         }
-        System.out.println(String.format("%d %d", res.get(0), res.get(1)));
+        // System.out.println(String.format("%d %d", res.get(0), res.get(1)));
         return res;
     }
 
     public static int deleteAccount(int type, int uid, Statement stmt, Scanner scanner) {
         System.out.println("Are you sure you want to delete your account?");
-        System.out.println("Enter \"y\" to confirm, press any other key to cancel.");
+        System.out.println("Enter \"y\" to confirm, enter any other key to cancel.");
         String confirm = scanner.nextLine();
         if (confirm.equalsIgnoreCase("y")) {
             try {
@@ -183,6 +184,93 @@ public class Operations {
         queries.add(insertReservation);
         queries.add(insertCalendar);
         return queries;
+    }
+
+    static void addComment(Scanner scanner, Statement stmt, Integer type, Integer curUID) throws Exception {
+        ResultSet rs = null;
+        boolean badEntry = true;
+        boolean badID = true;
+        String id = "";
+        String subject = type == 0 ? "user" : "listing";
+        Date startDate = null;
+        Date endDate = null;
+        while (badEntry) {
+            while (badID) {
+                System.out.println(String.format("Input %s's ID: ", subject));
+                id = scanner.nextLine();
+                String subExist = type == 0
+                ? String.format("SELECT ren_id FROM Renters WHERE uid = %s", id)
+                : String.format("SELECT * FROM Listings WHERE lid = %s", id);
+                rs = stmt.executeQuery(subExist);
+                if (rs.next())
+                    badID = false;      // Renter/Lising exists
+                else
+                    System.out.println(String.format("The %s does not exist", subject));
+            }
+            java.util.Date dateNow = new java.util.Date();
+            java.sql.Date curDate = new java.sql.Date(dateNow.getTime());
+            if (type == 0) {
+                // Checks if renter has rented in host's listings
+                String checkUser =  "SELECT * FROM CALENDAR WHERE ren_id = " + id +
+                " AND hid = " + curUID + 
+                " AND status = 'booked' " +
+                " AND (start_date <= '" + curDate + "' <= end_date" +
+                " OR end_date + interval 2 week >= '" + curDate + "');";
+                rs = stmt.executeQuery(checkUser);
+                if (!rs.next()) {
+                    System.out.println("User not found.");
+                    System.out.println(badEntry);
+                }
+                else {
+                    badEntry = false;
+                }
+            }
+            else {
+                // Check if list is in calendar
+                String checkListing = "SELECT * FROM CALENDAR WHERE lid = " + id +
+                " AND status = 'booked' " +
+                " AND (start_date <= '" + curDate + "' <= end_date" +
+                " OR end_date + interval 2 week >= '" + curDate + "');";
+                rs = stmt.executeQuery(checkListing);
+                if (!rs.next()) {
+                    System.out.println("Listing not found");
+                }
+                else {
+                    badEntry = false;
+                }
+            }
+        }
+        // Found subject
+        Boolean badRating = true;
+        Integer rating = 0;
+        while (badRating) {
+            System.out.println(String.format("Rate this %s from 1 - 5", subject));
+            rating = Integer.parseInt(scanner.nextLine());
+            badRating = (rating < 1 && rating > 5);
+        }
+        System.out.println("Add a short comment to your rating (optional): ");
+        String textComment = scanner.nextLine();
+        String insertComment = String.format(
+            "INSERT INTO Comments (rating, comment) VALUES (%d, '%s');",
+            rating, textComment
+        );
+        System.out.println(insertComment);
+        stmt.executeUpdate(insertComment);
+        String getCID = String.format("SELECT LAST_INSERT_ID();");
+        rs = stmt.executeQuery(getCID);
+        rs.next();
+        String cid = rs.getString("last_insert_id()");
+        String idConvert = type == 0
+        ? String.format("SELECT hid FROM Hosts WHERE uid = %d", curUID)
+        : String.format("SELECT ren_id FROM Renters WHERE uid = %d", curUID);
+        rs = stmt.executeQuery(idConvert);
+        rs.next();
+        String idConverted = type == 0 ? rs.getString("hid") : rs.getString("ren_id");
+        String insertLR = type == 0
+        ? String.format("INSERT INTO Renter_Comments (ren_id, cid, hid) VALUES ('%s', '%s', '%s')", id, cid, idConverted)
+        : String.format("INSERT INTO Listing_Comments (lid, cid, ren_id) VALUES ('%s', '%s', '%s')", id, cid, idConverted);
+        stmt.executeUpdate(insertLR);
+        System.out.println("Rating saved!");
     }
 
     static String updatePricing (Scanner scanner, Statement stmt, String hid) throws Exception {
@@ -375,6 +463,13 @@ public class Operations {
                     }
                     break;
                 case 6:
+                    if (userType == 1) {
+                        System.out.println("Invalid operation. Only renters may leave comments on listings");
+                        break;
+                    }
+                    addComment(scanner, stmt, 1, uid);
+                    break;
+                case 7:
                     count = stmt.executeUpdate(updatePricing(scanner, stmt, hid));
                     if (count == 0) {
                         System.out.println("Please enter a valid listing");
@@ -383,7 +478,7 @@ public class Operations {
                         System.out.println("Price Updated");
                     }
                     break;
-                case 7:
+                case 8:
                     count = stmt.executeUpdate(updateAvailability(scanner, stmt, hid));
                     if (count == 0) {
                         System.out.println("Please enter a valid listing");
@@ -391,6 +486,13 @@ public class Operations {
                     else {
                         System.out.println("Availability Updated");
                     }
+                    break;
+                case 9:
+                    if (userType == 0) {
+                        System.out.println("Invalid operation. Only ");
+                        break;
+                    }
+                    addComment(scanner, stmt, 0, uid);
                     break;
                 }
             }
