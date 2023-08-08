@@ -504,6 +504,93 @@ public class Operations {
         return updateAvailability;
     }
 
+    static String insertListing (Scanner scanner, int hid, Statement stmt) throws Exception {
+        boolean existingListing = true;
+        String address = "";
+        String city = "";
+        String country = "";
+        String postal_code = "";
+        String latitude = "";
+        String longitude = "";
+        String type = "";
+
+        System.out.println("Input a price:");
+        int price = Integer.parseInt(scanner.nextLine());
+        while (price < 0) {
+            System.out.println("Input a price:");
+            price = Integer.parseInt(scanner.nextLine());
+        }
+
+        while (existingListing) {
+            System.out.println("Input a address (e.g. 123 Fake Street):");
+            address = scanner.nextLine();
+    
+            System.out.println("Input a city:");
+            city = scanner.nextLine();
+    
+            System.out.println("Input a country:");
+            country = scanner.nextLine();
+    
+            System.out.println("Input a postal code (e.g. M5S 1A5):");
+            postal_code = scanner.nextLine();
+    
+            System.out.println("Input a latitude (e.g. 43.6532):");
+            latitude = scanner.nextLine();
+    
+            System.out.println("Input a longitude (e.g. -79.3832):");
+            longitude = scanner.nextLine();
+    
+            System.out.println("Input a type (e.g. apartment, house, condo):");
+            type = scanner.nextLine();
+    
+            // Check if listing exists
+            String checkListing = "SELECT * FROM LISTINGS WHERE latitude = " + latitude + " AND longitude = " + longitude + 
+            " AND type = '" + type + "' AND hid = " + hid + " AND city = '" + city + "' AND country = '" + country + 
+            "' AND postal_code = '" + postal_code + "' AND address = '" + address + "'";
+            ResultSet rs = stmt.executeQuery(checkListing);
+            if (rs.next()) {
+                System.out.println("Listing already exists");
+            }
+            else {
+                existingListing = false;
+            }
+        }
+
+        String insertListing = "INSERT INTO LISTINGS (price, latitude, longitude, type, hid, city, country, postal_code, address) " +
+        " VALUES (" + price + ", " + latitude + ", " + longitude + ", '" + type + "', " + hid + ", '" + city + "', '" + country + "', '" + postal_code + "', '" + address + "');";
+
+        return insertListing;
+    }
+
+    static String deleteListing (Scanner scanner, int hid, Statement stmt) throws Exception {
+        boolean badLID = true;
+        String lid = "";
+        while (badLID) {
+            System.out.println("Input a listing ID:");
+            lid = scanner.nextLine();
+    
+            // Check if listing belongs to host
+            String checkHost = "SELECT * FROM LISTINGS WHERE lid = " + lid + " AND hid = " + hid + ";";
+            ResultSet rs = stmt.executeQuery(checkHost);
+            if (!rs.next()) {
+                System.out.println("Listing does not belong to host or does not exist");
+            }
+
+            // Check if listing is booked
+            String checkBooked = "SELECT * FROM CALENDAR WHERE lid = " + lid + " AND status != 'booked';";
+            rs = stmt.executeQuery(checkBooked);
+            if (rs.next()) {
+                System.out.println("Listing is booked");
+            }
+        
+            badLID = false;
+        }
+
+        String deleteListing = "DELETE FROM LISTINGS WHERE lid = " + lid + " AND hid = " + hid + ";";
+
+        return deleteListing;
+    }
+
     public static void main(String[] args) throws Exception {
         Class.forName(JDBC_DRIVER);
         Integer userType = -1;              // -1: Not logged in; 0: Renter; 1: Host
@@ -520,14 +607,16 @@ public class Operations {
                 System.out.println("1: Create an account"); 
                 System.out.println("2: Login");
                 System.out.println("3: Delete account");
-                System.out.println("4: Cancel Booking");                // TODO
+                System.out.println("4: Cancel Booking");                
                 /* Renter operations */
                 System.out.println("5: Book a listing");             
-                System.out.println("6: Comment on a listing");          // TODO
+                System.out.println("6: Comment on a listing");          
                 /* Host Operations */
                 System.out.println("7: Update a Listing Price");
                 System.out.println("8: Update a Listing Availability");
-                System.out.println("9: Comment on a renter");           // TODO
+                System.out.println("9: Comment on a renter");           
+                System.out.println("10: Insert a Listing");
+                System.out.println("11: Delete: Delete a Listing");
 
                 System.out.println("0: Exit");
                 int option = Integer.parseInt(scanner.nextLine());
@@ -577,6 +666,10 @@ public class Operations {
                     break;
                 case 5:
                     while (failedReservation) {
+                        if (userType != 0) {
+                            System.out.println("Invalid operation. Only renters may book listings");
+                            break;
+                        }
                         List<String> tryQueries = bookListing(0, uid, scanner, stmt);
                         count = 0;
                         for (String query : tryQueries) {
@@ -592,13 +685,17 @@ public class Operations {
                     }
                     break;
                 case 6:
-                    if (userType == 1) {
+                    if (userType != 0) {
                         System.out.println("Invalid operation. Only renters may leave comments on listings");
                         break;
                     }
                     addComment(scanner, stmt, 1, uid);
                     break;
                 case 7:
+                    if (userType != 1) {
+                        System.out.println("Invalid operation. Only hosts may update listing prices");
+                        break;
+                    }
                     count = stmt.executeUpdate(updatePricing(scanner, stmt, 1, uid));
                     if (count == 0) {
                         System.out.println("Please enter a valid listing");
@@ -608,6 +705,10 @@ public class Operations {
                     }
                     break;
                 case 8:
+                    if (userType != 1) {
+                        System.out.println("Invalid operation. Only hosts may update listing availability");
+                        break;
+                    }
                     count = stmt.executeUpdate(updateAvailability(scanner, stmt, 1, uid));
                     if (count == 0) {
                         System.out.println("Please enter a valid listing");
@@ -617,11 +718,39 @@ public class Operations {
                     }
                     break;
                 case 9:
-                    if (userType == 0) {
-                        System.out.println("Invalid operation. Only ");
+                    if (userType != 1) {
+                        System.out.println("Invalid operation. Only hosts may leave comments on renters");
                         break;
                     }
                     addComment(scanner, stmt, 0, uid);
+                    break;
+                case 10:
+                    if (userType != 1) {
+                        System.out.println("Invalid operation. Only hosts may insert listings");
+                        break;
+                    }
+                    count = stmt.executeUpdate(insertListing(scanner, uid, stmt));
+                    if (count == 0) {
+                        System.out.println("Please enter a valid listing");
+                    }
+                    else {
+                        System.out.println("Listing Inserted");
+                    }
+                    break;
+                case 11:
+                    if (userType != 1) {
+                        System.out.println("Invalid operation. Only hosts may delete listings");
+                        break;
+                    }
+                    count = stmt.executeUpdate(deleteListing(scanner, uid, stmt));
+                    if (count == 0) {
+                        System.out.println("Please enter a valid listing");
+                    }
+                    else {
+                        System.out.println("Listing Deleted");
+                    }
+                    break;
+                default:
                     break;
                 }
             }
