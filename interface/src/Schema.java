@@ -1,4 +1,6 @@
     import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Schema {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
@@ -150,6 +152,24 @@ public class Schema {
                           " ON DELETE CASCADE ); ";
             stmt.executeUpdate(renter_comments_table);
             System.out.println("Renter comments table created");
+
+            String ignore = "SET FOREIGN_KEY_CHECKS = 0;";
+            stmt.executeUpdate(ignore);
+
+            List<String> drops = new ArrayList<String>();
+            drops.add("TRUNCATE TABLE HOSTS;"); 
+            drops.add("TRUNCATE TABLE RENTERS;");
+            drops.add("TRUNCATE TABLE RESERVATIONS;");
+            drops.add("TRUNCATE TABLE LISTINGS;"); 
+            drops.add("TRUNCATE TABLE LISTING_AMENITIES;");
+            drops.add("TRUNCATE TABLE AMENITIES;");
+            drops.add("TRUNCATE TABLE CALENDAR;");
+            drops.add("TRUNCATE TABLE USERS;");
+            drops.add("TRUNCATE TABLE LISTING_COMMENTS");
+            for (String drop:drops) {
+                stmt.executeUpdate(drop);
+            }
+            System.out.println("Database reset");
         }
         catch (SQLException e) {
             System.out.println(e.getMessage());
